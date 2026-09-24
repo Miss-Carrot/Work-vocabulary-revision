@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<title>Workplace Vocabulary (gap-fill)</title>
+<link rel="icon" type="image/png" sizes="48x48" href="favicon.png">
+<style>
+  :root{
+    --bg:#0f1116;
+    --card:#1a1d27;
+    --border:#2b2f3a;
+    --text:#e8e9ee;
+    --muted:#9aa0ad;
+    --accent:#5b8def;
+    --green:#2fbf71;
+    --green-bg:#12321f;
+    --green-text:#c9f6dc;
+    --red:#e6534a;
+    --red-bg:#3a1616;
+    --red-text:#ffd0cc;
+    --input-bg:#12141b;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f5f8;
+    --card:#ffffff;
+    --border:#dfe2ea;
+    --text:#1b1d24;
+    --muted:#6b7180;
+    --accent:#3763d6;
+    --green:#1f9d5c;
+    --green-bg:#e4f8ec;
+    --green-text:#0f5c33;
+    --red:#d63c33;
+    --red-bg:#fdeceb;
+    --red-text:#8a231c;
+    --input-bg:#f9f9fb;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding:24px 16px 60px;
+    transition:background .2s, color .2s;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{text-align:center;font-size:1.5rem;margin-bottom:4px;}
+  .sub{text-align:center;color:var(--muted);font-size:0.9rem;margin-bottom:20px;}
+  .top-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    padding:10px 0;
+    z-index:5;
+    border-bottom:1px solid var(--border);
+    margin-bottom:16px;
+  }
+  #timer{
+    font-size:1.3rem;
+    font-weight:700;
+    padding:6px 14px;
+    border-radius:8px;
+    background:var(--card);
+    border:1px solid var(--border);
+    min-width:80px;
+    text-align:center;
+  }
+  #timer.warn{color:var(--red);border-color:var(--red);}
+  #score{font-size:0.95rem;color:var(--muted);}
+  #theme-toggle{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:0.85rem;
+    cursor:pointer;
+  }
+  .item{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:10px;
+  }
+  .item-num{
+    color:var(--muted);
+    font-size:0.8rem;
+    margin-bottom:4px;
+  }
+  .phrase{
+    font-size:1.05rem;
+    line-height:2.1;
+  }
+  .def{
+    margin-top:8px;
+    font-size:0.9rem;
+    color:var(--muted);
+    font-style:italic;
+  }
+  input.gap{
+    width:auto;
+    min-width:70px;
+    max-width:160px;
+    padding:4px 8px;
+    margin:0 2px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    background:var(--input-bg);
+    color:var(--text);
+    font-size:1rem;
+    text-align:center;
+    outline:none;
+    transition:background .15s, border-color .15s;
+  }
+  input.gap:focus{border-color:var(--accent);}
+  input.gap.correct{
+    background:var(--green-bg);
+    border-color:var(--green);
+    color:var(--green-text);
+  }
+  input.gap.incorrect{
+    background:var(--red-bg);
+    border-color:var(--red);
+    color:var(--red-text);
+  }
+  input.gap:disabled{opacity:0.7;}
+  #finish-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(10,11,15,0.55);
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+  }
+  #finish-box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:28px 30px;
+    text-align:center;
+    max-width:340px;
+    color:var(--text);
+  }
+  #finish-box h2{margin-top:0;}
+  #finish-box p{color:var(--muted);}
+  button.primary{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    font-size:0.95rem;
+    cursor:pointer;
+    margin-top:10px;
+  }
+  button.primary:hover{opacity:0.9;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Workplace Vocabulary (gap-fill)</h1>
+  <p class="sub">Fill in the missing word(s) in each phrase to match its definition. You have 4 minutes.</p>
+
+  <div class="top-bar">
+    <div id="timer">04:00</div>
+    <div id="score">0 / 0 correct</div>
+    <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+  </div>
+
+  <div id="quiz"></div>
+</div>
+
+<div id="finish-overlay">
+  <div id="finish-box">
+    <h2>Time's up!</h2>
+    <p id="final-score"></p>
+    <button class="primary" onclick="location.reload()">Try again</button>
+  </div>
+</div>
+
+<script>
+// Each item: array of segments. type "text" = fixed text, type "blank" = a gap with accepted answers.
+const data = [
+  { segments: [
+      {type:"text", value:"to be severely "},
+      {type:"blank", accepted:["underpaid"]}
+    ], def: "to receive much less money than you deserve for the work you do" },
+
+  { segments: [
+      {type:"text", value:"to have a "},
+      {type:"blank", accepted:["background"]},
+      {type:"text", value:" "},
+      {type:"blank", accepted:["in"]}
+    ], def: "to have education, training, or previous experience in a particular field" },
+
+  { segments: [
+      {type:"text", value:"to "},
+      {type:"blank", accepted:["climb"]},
+      {type:"text", value:" the "},
+      {type:"blank", accepted:["corporate"]},
+      {type:"text", value:" "},
+      {type:"blank", accepted:["ladder"]}
+    ], def: "to gradually move into higher and more senior positions in a company" },
+
+  { segments: [
+      {type:"text", value:"to "},
+      {type:"blank", accepted:["treat"]},
+      {type:"text", value:" someone "},
+      {type:"blank", accepted:["unfairly"]}
+    ], def: "to behave towards someone in an unjust or unequal way" },
+
+  { segments: [
+      {type:"blank", accepted:["perks"]},
+      {type:"text", value:" and "},
+      {type:"blank", accepted:["benefits"]}
+    ], def: "extra advantages provided by an employer in addition to your salary, such as insurance, bonuses, or free meals" },
+
+  { segments: [
+      {type:"text", value:"a "},
+      {type:"blank", accepted:["fixed"]},
+      {type:"text", value:"-"},
+      {type:"blank", accepted:["term"]},
+      {type:"text", value:" contract"}
+    ], def: "a job agreement for a limited period" },
+
+  { segments: [
+      {type:"text", value:"a "},
+      {type:"blank", accepted:["long"]},
+      {type:"text", value:"-"},
+      {type:"blank", accepted:["term"]},
+      {type:"text", value:" position"}
+    ], def: "a job intended to continue for a long period" },
+
+  { segments: [
+      {type:"blank", accepted:["hands"]},
+      {type:"text", value:"-"},
+      {type:"blank", accepted:["on"]},
+      {type:"text", value:" experience"}
+    ], def: "practical experience gained by actually doing something rather than just studying it" },
+
+  { segments: [
+      {type:"blank", accepted:["relevant"]},
+      {type:"text", value:" experience"}
+    ], def: "previous work experience that is directly useful for a particular job or role" },
+
+  { segments: [
+      {type:"text", value:"to "},
+      {type:"blank", accepted:["seize","grab","take"]},
+      {type:"text", value:" the opportunity"}
+    ], def: "to take advantage of an opportunity quickly and confidently" },
+
+  { segments: [
+      {type:"blank", accepted:["extensive","considerable","vast"]},
+      {type:"text", value:" expertise"}
+    ], def: "a very high level of knowledge or skill gained through considerable experience" },
+
+  { segments: [
+      {type:"text", value:"to "},
+      {type:"blank", accepted:["gain","acquire","get"]},
+      {type:"text", value:" experience"}
+    ], def: "to get experience by doing a job or activity" },
+
+  { segments: [
+      {type:"text", value:"to be "},
+      {type:"blank", accepted:["in"]},
+      {type:"text", value:" "},
+      {type:"blank", accepted:["charge"]},
+      {type:"text", value:" "},
+      {type:"blank", accepted:["of"]}
+    ], def: "to be responsible for controlling or managing someone or something" },
+
+  { segments: [
+      {type:"text", value:"a "},
+      {type:"blank", accepted:["steady","stable"]},
+      {type:"text", value:" income"}
+    ], def: "a regular and reliable amount of money that you earn" },
+
+  { segments: [
+      {type:"text", value:"to "},
+      {type:"blank", accepted:["come"]},
+      {type:"text", value:" "},
+      {type:"blank", accepted:["across"]},
+      {type:"text", value:" an opportunity"}
+    ], def: "to find or discover an opportunity, often unexpectedly" },
+
+  { segments: [
+      {type:"text", value:"to "},
+      {type:"blank", accepted:["work"]},
+      {type:"text", value:" "},
+      {type:"blank", accepted:["long"]},
+      {type:"text", value:" hours"}
+    ], def: "to work for many hours, especially beyond the normal working day" },
+
+  { segments: [
+      {type:"text", value:"as a "},
+      {type:"blank", accepted:["one"]},
+      {type:"text", value:"-"},
+      {type:"blank", accepted:["off"]}
+    ], def: "only once, rather than as something that happens regularly" },
+
+  { segments: [
+      {type:"text", value:"to handle the "},
+      {type:"blank", accepted:["highs"]},
+      {type:"text", value:" and "},
+      {type:"blank", accepted:["lows"]}
+    ], def: "to deal successfully with both the good and difficult periods of a situation" },
+
+  { segments: [
+      {type:"text", value:"to be "},
+      {type:"blank", accepted:["held"]},
+      {type:"text", value:" "},
+      {type:"blank", accepted:["accountable","responsible"]}
+    ], def: "to be responsible for something and expected to explain or justify your actions or results" },
+
+  { segments: [
+      {type:"text", value:"to "},
+      {type:"blank", accepted:["miss"]},
+      {type:"text", value:" out on the opportunity"}
+    ], def: "to fail to take advantage of an opportunity" },
+
+  { segments: [
+      {type:"text", value:"to adapt "},
+      {type:"blank", accepted:["to"]},
+      {type:"text", value:" changing "},
+      {type:"blank", accepted:["circumstances","conditions"]}
+    ], def: "to adjust your behaviour or approach when a situation changes" },
+
+  { segments: [
+      {type:"text", value:"to "},
+      {type:"blank", accepted:["violate","breach"]},
+      {type:"text", value:" employees\u2019 rights"}
+    ], def: "to break laws or rules that protect employees and their working conditions" },
+
+  { segments: [
+      {type:"text", value:"to build a financial "},
+      {type:"blank", accepted:["cushion","buffer"]}
+    ], def: "to save enough money to have a reserve for unexpected expenses or periods without income" }
+];
+
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function normalize(str){
+  return str.toLowerCase().trim().replace(/[^a-z]/g, "");
+}
+
+const shuffledData = shuffle(data);
+const quizEl = document.getElementById("quiz");
+
+let totalBlanks = 0;
+let correctBlanks = 0;
+let timeLeft = 240;
+let timerId = null;
+let finished = false;
+
+shuffledData.forEach((item, idx) => {
+  const row = document.createElement("div");
+  row.className = "item";
+
+  const numEl = document.createElement("div");
+  numEl.className = "item-num";
+  numEl.textContent = "Phrase " + (idx + 1) + " of " + shuffledData.length;
+
+  const phraseEl = document.createElement("div");
+  phraseEl.className = "phrase";
+
+  item.segments.forEach(seg => {
+    if (seg.type === "text"){
+      phraseEl.appendChild(document.createTextNode(seg.value));
+    } else {
+      totalBlanks++;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "gap";
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      input.dataset.checked = "false";
+      const size = Math.max(...seg.accepted.map(a => a.length));
+      input.style.width = (size * 0.85 + 2) + "ch";
+
+      input.addEventListener("input", () => {
+        if (finished) return;
+        const typed = normalize(input.value);
+        if (typed.length === 0){
+          if (input.dataset.checked === "true"){
+            correctBlanks = Math.max(0, correctBlanks - 1);
+          }
+          input.dataset.checked = "false";
+          input.classList.remove("correct", "incorrect");
+          updateScore();
+          return;
+        }
+        const isCorrect = seg.accepted.some(a => normalize(a) === typed);
+        if (isCorrect){
+          if (input.dataset.checked !== "true"){
+            correctBlanks++;
+          }
+          input.dataset.checked = "true";
+          input.classList.add("correct");
+          input.classList.remove("incorrect");
+        } else {
+          if (input.dataset.checked === "true"){
+            correctBlanks = Math.max(0, correctBlanks - 1);
+          }
+          input.dataset.checked = "false";
+          input.classList.add("incorrect");
+          input.classList.remove("correct");
+        }
+        updateScore();
+      });
+
+      phraseEl.appendChild(input);
+    }
+  });
+
+  const defEl = document.createElement("div");
+  defEl.className = "def";
+  defEl.textContent = item.def;
+
+  row.appendChild(numEl);
+  row.appendChild(phraseEl);
+  row.appendChild(defEl);
+  quizEl.appendChild(row);
+});
+
+function updateScore(){
+  document.getElementById("score").textContent = correctBlanks + " / " + totalBlanks + " correct";
+}
+updateScore();
+
+function formatTime(t){
+  const m = Math.floor(t / 60).toString().padStart(2, "0");
+  const s = (t % 60).toString().padStart(2, "0");
+  return m + ":" + s;
+}
+
+function tick(){
+  timeLeft--;
+  const timerEl = document.getElementById("timer");
+  timerEl.textContent = formatTime(Math.max(timeLeft, 0));
+  if (timeLeft <= 10) timerEl.classList.add("warn");
+  if (timeLeft <= 0){
+    clearInterval(timerId);
+    endQuiz();
+  }
+}
+
+function endQuiz(){
+  finished = true;
+  document.querySelectorAll("input.gap").forEach(inp => {
+    inp.disabled = true;
+    if (inp.dataset.checked !== "true"){
+      inp.classList.add("incorrect");
+    }
+  });
+  document.getElementById("final-score").textContent =
+    "You got " + correctBlanks + " out of " + totalBlanks + " gaps correct.";
+  document.getElementById("finish-overlay").style.display = "flex";
+}
+
+function toggleTheme(){
+  const html = document.documentElement;
+  const btn = document.getElementById("theme-toggle");
+  if (html.getAttribute("data-theme") === "light"){
+    html.removeAttribute("data-theme");
+    btn.textContent = "☀ Light";
+  } else {
+    html.setAttribute("data-theme", "light");
+    btn.textContent = "🌙 Dark";
+  }
+}
+
+timerId = setInterval(tick, 1000);
+</script>
+</body>
+</html>
