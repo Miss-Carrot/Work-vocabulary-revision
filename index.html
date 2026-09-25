@@ -166,10 +166,10 @@
 <body>
 <div class="wrap">
   <h1>Workplace Vocabulary (gap-fill)</h1>
-  <p class="sub">Fill in the missing word(s) in each phrase to match its definition. You have 4 minutes.</p>
+  <p class="sub">Fill in the missing word(s) in each phrase to match its definition. You have 3 minutes.</p>
 
   <div class="top-bar">
-    <div id="timer">04:00</div>
+    <div id="timer">03:00</div>
     <div id="score">0 / 0 correct</div>
     <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
   </div>
@@ -186,162 +186,156 @@
 </div>
 
 <script>
-// Each item: array of segments. type "text" = fixed text, type "blank" = a gap with accepted answers.
+// Each item: array of segments. type "text" = fixed text, type "blank" = a gap with the single exact accepted answer.
+// No synonyms are accepted for any gap - only the exact word given.
 const data = [
   { segments: [
       {type:"text", value:"to be severely "},
-      {type:"blank", accepted:["underpaid"]}
+      {type:"blank", answer:"underpaid"}
     ], def: "to receive much less money than you deserve for the work you do" },
 
   { segments: [
       {type:"text", value:"to have a "},
-      {type:"blank", accepted:["background"]},
-      {type:"text", value:" "},
-      {type:"blank", accepted:["in"]}
+      {type:"blank", answer:"background"},
+      {type:"text", value:" in"}
     ], def: "to have education, training, or previous experience in a particular field" },
 
   { segments: [
       {type:"text", value:"to "},
-      {type:"blank", accepted:["climb"]},
-      {type:"text", value:" the "},
-      {type:"blank", accepted:["corporate"]},
-      {type:"text", value:" "},
-      {type:"blank", accepted:["ladder"]}
+      {type:"blank", answer:"climb"},
+      {type:"text", value:" the corporate "},
+      {type:"blank", answer:"ladder"}
     ], def: "to gradually move into higher and more senior positions in a company" },
 
   { segments: [
       {type:"text", value:"to "},
-      {type:"blank", accepted:["treat"]},
-      {type:"text", value:" someone "},
-      {type:"blank", accepted:["unfairly"]}
+      {type:"blank", answer:"treat"},
+      {type:"text", value:" someone unfairly"}
     ], def: "to behave towards someone in an unjust or unequal way" },
 
   { segments: [
-      {type:"blank", accepted:["perks"]},
-      {type:"text", value:" and "},
-      {type:"blank", accepted:["benefits"]}
+      {type:"text", value:"benefits and "},
+      {type:"blank", answer:"perks"}
     ], def: "extra advantages provided by an employer in addition to your salary, such as insurance, bonuses, or free meals" },
 
   { segments: [
       {type:"text", value:"a "},
-      {type:"blank", accepted:["fixed"]},
+      {type:"blank", answer:"short"},
       {type:"text", value:"-"},
-      {type:"blank", accepted:["term"]},
+      {type:"blank", answer:"term"},
       {type:"text", value:" contract"}
     ], def: "a job agreement for a limited period" },
 
   { segments: [
       {type:"text", value:"a "},
-      {type:"blank", accepted:["long"]},
+      {type:"blank", answer:"long"},
       {type:"text", value:"-"},
-      {type:"blank", accepted:["term"]},
+      {type:"blank", answer:"term"},
       {type:"text", value:" position"}
     ], def: "a job intended to continue for a long period" },
 
   { segments: [
-      {type:"blank", accepted:["hands"]},
+      {type:"blank", answer:"hands"},
       {type:"text", value:"-"},
-      {type:"blank", accepted:["on"]},
+      {type:"blank", answer:"on"},
       {type:"text", value:" experience"}
     ], def: "practical experience gained by actually doing something rather than just studying it" },
 
   { segments: [
-      {type:"blank", accepted:["relevant"]},
+      {type:"blank", answer:"relevant"},
       {type:"text", value:" experience"}
     ], def: "previous work experience that is directly useful for a particular job or role" },
 
   { segments: [
       {type:"text", value:"to "},
-      {type:"blank", accepted:["seize","grab","take"]},
+      {type:"blank", answer:"seize"},
       {type:"text", value:" the opportunity"}
     ], def: "to take advantage of an opportunity quickly and confidently" },
 
   { segments: [
-      {type:"blank", accepted:["extensive","considerable","vast"]},
+      {type:"blank", answer:"extensive"},
       {type:"text", value:" expertise"}
     ], def: "a very high level of knowledge or skill gained through considerable experience" },
 
   { segments: [
       {type:"text", value:"to "},
-      {type:"blank", accepted:["gain","acquire","get"]},
+      {type:"blank", answer:"gain"},
       {type:"text", value:" experience"}
     ], def: "to get experience by doing a job or activity" },
 
   { segments: [
       {type:"text", value:"to be "},
-      {type:"blank", accepted:["in"]},
-      {type:"text", value:" "},
-      {type:"blank", accepted:["charge"]},
-      {type:"text", value:" "},
-      {type:"blank", accepted:["of"]}
+      {type:"blank", answer:"in"},
+      {type:"text", value:" charge "},
+      {type:"blank", answer:"of"}
     ], def: "to be responsible for controlling or managing someone or something" },
 
   { segments: [
       {type:"text", value:"a "},
-      {type:"blank", accepted:["steady","stable"]},
+      {type:"blank", answer:"steady"},
       {type:"text", value:" income"}
     ], def: "a regular and reliable amount of money that you earn" },
 
   { segments: [
       {type:"text", value:"to "},
-      {type:"blank", accepted:["come"]},
+      {type:"blank", answer:"come"},
       {type:"text", value:" "},
-      {type:"blank", accepted:["across"]},
+      {type:"blank", answer:"across"},
       {type:"text", value:" an opportunity"}
     ], def: "to find or discover an opportunity, often unexpectedly" },
 
   { segments: [
-      {type:"text", value:"to "},
-      {type:"blank", accepted:["work"]},
-      {type:"text", value:" "},
-      {type:"blank", accepted:["long"]},
+      {type:"text", value:"to work "},
+      {type:"blank", answer:"long"},
       {type:"text", value:" hours"}
     ], def: "to work for many hours, especially beyond the normal working day" },
 
   { segments: [
-      {type:"text", value:"as a "},
-      {type:"blank", accepted:["one"]},
-      {type:"text", value:"-"},
-      {type:"blank", accepted:["off"]}
+      {type:"text", value:"as a one-"},
+      {type:"blank", answer:"off"}
     ], def: "only once, rather than as something that happens regularly" },
 
   { segments: [
       {type:"text", value:"to handle the "},
-      {type:"blank", accepted:["highs"]},
+      {type:"blank", answer:"ups"},
       {type:"text", value:" and "},
-      {type:"blank", accepted:["lows"]}
+      {type:"blank", answer:"downs"}
     ], def: "to deal successfully with both the good and difficult periods of a situation" },
 
   { segments: [
       {type:"text", value:"to be "},
-      {type:"blank", accepted:["held"]},
-      {type:"text", value:" "},
-      {type:"blank", accepted:["accountable","responsible"]}
+      {type:"blank", answer:"accountable"},
+      {type:"text", value:" for"}
     ], def: "to be responsible for something and expected to explain or justify your actions or results" },
 
   { segments: [
       {type:"text", value:"to "},
-      {type:"blank", accepted:["miss"]},
+      {type:"blank", answer:"miss"},
       {type:"text", value:" out on the opportunity"}
     ], def: "to fail to take advantage of an opportunity" },
 
   { segments: [
       {type:"text", value:"to adapt "},
-      {type:"blank", accepted:["to"]},
+      {type:"blank", answer:"to"},
       {type:"text", value:" changing "},
-      {type:"blank", accepted:["circumstances","conditions"]}
+      {type:"blank", answer:"circumstances"}
     ], def: "to adjust your behaviour or approach when a situation changes" },
 
   { segments: [
       {type:"text", value:"to "},
-      {type:"blank", accepted:["violate","breach"]},
+      {type:"blank", answer:"violate"},
       {type:"text", value:" employees\u2019 rights"}
     ], def: "to break laws or rules that protect employees and their working conditions" },
 
   { segments: [
       {type:"text", value:"to build a financial "},
-      {type:"blank", accepted:["cushion","buffer"]}
-    ], def: "to save enough money to have a reserve for unexpected expenses or periods without income" }
+      {type:"blank", answer:"cushion"}
+    ], def: "to save enough money to have a reserve for unexpected expenses or periods without income" },
+
+  { segments: [
+      {type:"text", value:"to get a "},
+      {type:"blank", answer:"promotion"}
+    ], def: "to move to a higher position at work, usually with more responsibility and a higher salary" }
 ];
 
 function shuffle(arr){
@@ -362,7 +356,7 @@ const quizEl = document.getElementById("quiz");
 
 let totalBlanks = 0;
 let correctBlanks = 0;
-let timeLeft = 240;
+let timeLeft = 180;
 let timerId = null;
 let finished = false;
 
@@ -388,8 +382,7 @@ shuffledData.forEach((item, idx) => {
       input.autocomplete = "off";
       input.spellcheck = false;
       input.dataset.checked = "false";
-      const size = Math.max(...seg.accepted.map(a => a.length));
-      input.style.width = (size * 0.85 + 2) + "ch";
+      input.style.width = (seg.answer.length * 0.85 + 2) + "ch";
 
       input.addEventListener("input", () => {
         if (finished) return;
@@ -403,7 +396,7 @@ shuffledData.forEach((item, idx) => {
           updateScore();
           return;
         }
-        const isCorrect = seg.accepted.some(a => normalize(a) === typed);
+        const isCorrect = normalize(seg.answer) === typed;
         if (isCorrect){
           if (input.dataset.checked !== "true"){
             correctBlanks++;
